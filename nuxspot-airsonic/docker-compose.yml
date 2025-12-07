@@ -6,7 +6,7 @@ services:
       PROXY_AUTH_ADD: "false"
 
   server:
-    image: airsonic/airsonic
+    image: airsonic/airsonic:latest
     restart: on-failure
     environment:
       - PUID=1000
