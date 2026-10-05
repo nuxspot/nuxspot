@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gran Rueda Dorada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bungee&family=Orbitron:wght@700;900&family=Oswald:wght@500;700&display=swap">
+<style>
+/* Layout: a fixed 720x1280 slot cabinet (marquee, top-box wheel, reel glass, LED meters, button deck) scaled to fit the screen. */
+:root {
+  color-scheme: dark;
+  --room: #07050f;
+  --cabinet: #1a0f2e;
+  --cabinet-edge: #2c1a4d;
+  --gold: #f6c544;
+  --gold-deep: #a8740f;
+  --gold-light: #fff1b8;
+  --ruby: #d61f3a;
+  --led: #ff3b2f;
+  --led-off: #3a0d0b;
+  --glass: #fdfaf2;
+  --ink: #fff7e2;
+  --font-display: "Bungee", "Anton", Impact, sans-serif;
+  --font-wheel: "Anton", "Oswald", Impact, sans-serif;
+  --font-ui: "Oswald", "Arial Narrow", sans-serif;
+  --font-led: "Orbitron", "Courier New", monospace;
+}
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at 50% 30%, #2a1450 0%, var(--room) 70%);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  overflow: hidden;
+  touch-action: manipulation;
+  -webkit-user-select: none; user-select: none;
+}
+#viewport { position: fixed; inset: 0; display: grid; place-items: center; }
+#stage {
+  position: absolute; left: 50%; top: 50%;
+  width: 720px; height: 1280px;
+  transform-origin: 0 0;
+  border-radius: 34px;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.06), transparent 8%, transparent 92%, rgba(255,255,255,.06)),
+    linear-gradient(180deg, var(--cabinet-edge), var(--cabinet) 30%, #120a22 100%);
+  box-shadow: 0 0 0 6px #0c0718, 0 0 0 10px var(--gold-deep), 0 0 0 12px #0c0718, 0 30px 80px rgba(0,0,0,.8), 0 0 120px rgba(160,90,255,.25);
+  overflow: hidden;
+}
+
+/* ---------- marquee ---------- */
+#marquee {
+  position: absolute; left: 30px; right: 30px; top: 18px; height: 92px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #8a0f22, #4c0612);
+  box-shadow: inset 0 0 0 4px var(--gold), inset 0 0 0 7px #3a0410, inset 0 6px 20px rgba(255,255,255,.2);
+  display: grid; place-items: center;
+}
+#marquee h1 {
+  margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 46px; letter-spacing: 2px;
+  background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 45%, var(--gold-deep) 55%, var(--gold) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 3px 0 #3a0410) drop-shadow(0 0 12px rgba(255,200,80,.5));
+}
+.bulbs { position: absolute; inset: 0; pointer-events: none; }
+.bulb {
+  position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff 0%, #ffe9a0 35%, #e0a020 80%);
+  box-shadow: 0 0 8px 2px rgba(255,210,90,.8);
+  animation: chase 1.2s steps(1) infinite;
+}
+.bulb.b { animation-delay: -.6s; }
+@keyframes chase { 0% { opacity: 1; } 50% { opacity: .18; box-shadow: none; } }
+.fast .bulb { animation-duration: .24s; }
+.fast .bulb.b { animation-delay: -.12s; }
+
+/* ---------- wheel top box ---------- */
+#topbox { position: absolute; left: 0; right: 0; top: 118px; height: 600px; }
+#wheelWrap { position: absolute; left: 60px; top: 6px; width: 600px; height: 600px; cursor: pointer; }
+#wheelWrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
+#wheelRot { will-change: transform; }
+#pointer { transform-origin: 300px 6px; transition: transform .16s cubic-bezier(.3,1.8,.5,1); }
+#bonusBanner {
+  position: absolute; left: 50%; top: 255px; transform: translateX(-50%) rotate(-4deg);
+  padding: 10px 26px 12px; border-radius: 14px;
+  font-family: var(--font-display); font-size: 40px; white-space: nowrap; color: #fff;
+  background: linear-gradient(180deg, #ff4058, #a30a22);
+  box-shadow: 0 0 0 4px var(--gold), 0 0 0 7px #4a0612, 0 12px 30px rgba(0,0,0,.6), 0 0 40px rgba(255,80,100,.7);
+  text-shadow: 0 3px 0 #5a0414;
+  animation: pulse .6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes pulse { to { transform: translateX(-50%) rotate(-4deg) scale(1.07); } }
+
+/* ---------- reels ---------- */
+#reelBox {
+  position: absolute; left: 34px; right: 34px; top: 728px; height: 362px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold) 20%, var(--gold-deep) 50%, var(--gold) 80%, var(--gold-light));
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.6);
+}
+#reelInner {
+  position: relative; height: 100%; border-radius: 12px; overflow: hidden;
+  background: #120a22; display: flex; gap: 8px; padding: 0 8px;
+  box-shadow: inset 0 0 0 3px #3b2208;
+}
+.reel { position: relative; flex: 1; overflow: hidden; background: var(--glass); border-radius: 6px; }
+.reel::after { /* curved glass shading */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.08) 22%, rgba(255,255,255,.12) 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,.08) 78%, rgba(0,0,0,.6) 100%);
+}
+.strip { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+.strip.blur { filter: url(#vblur); }
+.cell { height: 111px; display: grid; place-items: center; }
+.cell svg { width: 150px; height: 100px; overflow: visible; }
+.cell.win svg { animation: winpop .45s ease-in-out infinite alternate; }
+@keyframes winpop { to { transform: scale(1.12); filter: drop-shadow(0 0 10px #ffd34d); } }
+#payline {
+  position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px;
+  background: linear-gradient(90deg, transparent, rgba(214,31,58,.9) 4%, rgba(214,31,58,.9) 96%, transparent);
+  box-shadow: 0 0 8px rgba(255,40,60,.8); pointer-events: none; opacity: .75;
+}
+#payline.hot { opacity: 1; animation: lineflash .25s steps(1) infinite; }
+@keyframes lineflash { 50% { opacity: .2; } }
+.lineTag {
+  position: absolute; top: 50%; transform: translateY(-50%); width: 18px; height: 34px;
+  background: var(--ruby); color: #fff; font: 700 16px var(--font-ui); display: grid; place-items: center;
+  box-shadow: 0 0 0 2px var(--gold-light);
+}
+#tagL { left: -14px; border-radius: 0 6px 6px 0; } #tagR { right: -14px; border-radius: 6px 0 0 6px; }
+
+/* ---------- meters ---------- */
+#meters { position: absolute; left: 34px; right: 34px; top: 1102px; height: 66px; display: grid; grid-template-columns: 1.3fr .7fr 1.3fr; gap: 10px; }
+.meter {
+  background: #0b0507; border-radius: 10px; padding: 6px 12px 4px;
+  box-shadow: inset 0 0 0 2px #3a2a10, inset 0 4px 14px rgba(0,0,0,.9), 0 0 0 2px var(--gold-deep);
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.meter label { font: 500 12px var(--font-ui); letter-spacing: 2px; color: var(--gold); text-transform: uppercase; }
+.meter output {
+  font: 900 30px var(--font-led); color: var(--led); text-align: right; line-height: 1;
+  text-shadow: 0 0 8px rgba(255,59,47,.85); font-variant-numeric: tabular-nums;
+}
+
+/* ---------- buttons ---------- */
+#deck { position: absolute; left: 24px; right: 24px; top: 1182px; height: 84px; display: flex; gap: 10px; align-items: center; }
+.btn {
+  appearance: none; border: 0; cursor: pointer; color: #fff; height: 70px; flex: 1; border-radius: 14px;
+  font: 700 17px/1.05 var(--font-ui); letter-spacing: 1px; text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(0,0,0,.45);
+  box-shadow: inset 0 3px 0 rgba(255,255,255,.45), inset 0 -6px 0 rgba(0,0,0,.3), 0 6px 0 #05030a, 0 8px 18px rgba(0,0,0,.6);
+  transition: transform .06s, box-shadow .06s, filter .2s;
+}
+.btn:active:not(:disabled) { transform: translateY(5px); box-shadow: inset 0 3px 0 rgba(255,255,255,.4), inset 0 -3px 0 rgba(0,0,0,.3), 0 1px 0 #05030a; }
+.btn:disabled { filter: grayscale(.8) brightness(.55); cursor: default; }
+.btn:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 3px; }
+.btn small { display: block; font-size: 12px; opacity: .85; letter-spacing: 1.5px; }
+.b-info { flex: .55; background: linear-gradient(180deg, #5a6ad8, #27308a); }
+.b-bet { background: linear-gradient(180deg, #ffc93a, #c0790a); color: #3a1f00; text-shadow: 0 1px 0 rgba(255,255,255,.5); }
+.b-max { background: linear-gradient(180deg, #ff5a6e, #a50d26); }
+.b-spin {
+  flex: 1.5; height: 80px; font-family: var(--font-display); font-weight: 400; font-size: 28px; letter-spacing: 2px;
+  background: radial-gradient(ellipse at 50% 20%, #7dff9a, #18a843 55%, #0b6a28);
+}
+.b-spin.glow { animation: spinglow .5s ease-in-out infinite alternate; }
+@keyframes spinglow { to { filter: brightness(1.3) drop-shadow(0 0 14px #7dff9a); } }
+
+#mute {
+  position: absolute; right: 26px; top: 128px; width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
+  background: rgba(0,0,0,.35); color: var(--gold-light); font: 700 13px var(--font-ui); z-index: 3;
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+#mute:focus-visible { outline: 3px solid var(--gold-light); }
+
+/* ---------- win celebration ---------- */
+#winFx {
+  position: absolute; left: 150px; right: 150px; top: 858px; text-align: center; pointer-events: none; z-index: 4;
+  padding: 4px 0 10px; border-radius: 18px; line-height: 1.1;
+  background: radial-gradient(ellipse at 50% 40%, rgba(40,16,70,.92), rgba(12,6,24,.88));
+  box-shadow: 0 0 0 3px var(--gold), 0 10px 30px rgba(0,0,0,.6);
+  font-family: var(--font-display); font-size: 64px; color: var(--gold-light);
+  text-shadow: 0 4px 0 #6b3a00, 0 0 30px rgba(255,200,60,.9);
+}
+#winFx:empty { display: none; }
+#winFx.show { animation: winIn .5s cubic-bezier(.2,1.6,.4,1); }
+@keyframes winIn { from { transform: scale(.2); opacity: 0; } }
+#winFx small { display: block; font: 700 22px var(--font-ui); letter-spacing: 3px; color: #fff; text-shadow: 0 2px 6px #000; }
+
+/* ---------- paytable overlay ---------- */
+#pay {
+  position: absolute; inset: 0; z-index: 10; background: rgba(8,4,18,.94); padding: 36px 40px; overflow-y: auto;
+}
+#pay h2 { font: 400 38px var(--font-display); color: var(--gold); text-align: center; margin: 6px 0 4px; }
+#pay p { text-align: center; margin: 0 0 18px; font-size: 17px; color: #e8dcff; line-height: 1.4; }
+#pay table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+#pay th { font: 500 13px var(--font-ui); letter-spacing: 2px; color: var(--gold); text-align: right; padding: 4px 8px; }
+#pay th:first-child { text-align: left; }
+#pay td { padding: 4px 8px; border-top: 1px solid rgba(246,197,68,.18); text-align: right; font: 700 22px var(--font-led); color: var(--led); }
+#pay td:first-child { text-align: left; font: 500 17px var(--font-ui); color: var(--ink); display: flex; align-items: center; gap: 4px; }
+#pay td:first-child svg { width: 52px; height: 36px; flex: none; }
+#pay td.max { color: #ffd34d; text-shadow: 0 0 6px rgba(255,211,77,.6); }
+#pay .note { font-size: 15px; color: #c9b8ef; margin-top: 16px; text-align: left; line-height: 1.5; }
+#pay .close { display: block; margin: 20px auto 0; width: 260px; flex: none; background: linear-gradient(180deg, #5a6ad8, #27308a); }
+
+@media (prefers-reduced-motion: reduce) {
+  .bulb, .b-spin.glow, #bonusBanner, .cell.win svg, #payline.hot { animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- shared SVG definitions for symbols and wheel -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="vblur" x="0" y="-10%" width="100%" height="120%"><feGaussianBlur stdDeviation="0 9"></feGaussianBlur></filter>
+    <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff6c8"></stop><stop offset=".45" stop-color="#f6c544"></stop>
+      <stop offset=".55" stop-color="#b47c10"></stop><stop offset="1" stop-color="#f6c544"></stop>
+    </linearGradient>
+    <linearGradient id="gRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff8a8a"></stop><stop offset=".4" stop-color="#e01b2e"></stop><stop offset="1" stop-color="#7a0614"></stop>
+    </linearGradient>
+    <linearGradient id="gBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9ec5ff"></stop><stop offset=".4" stop-color="#1f5fe0"></stop><stop offset="1" stop-color="#0a2470"></stop>
+    </linearGradient>
+    <linearGradient id="gBar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a4a58"></stop><stop offset=".5" stop-color="#121218"></stop><stop offset="1" stop-color="#2a2a34"></stop>
+    </linearGradient>
+    <radialGradient id="gCherry" cx=".35" cy=".3" r=".75">
+      <stop offset="0" stop-color="#ffd0d6"></stop><stop offset=".25" stop-color="#ff2846"></stop><stop offset="1" stop-color="#6a0012"></stop>
+    </radialGradient>
+    <linearGradient id="gLeaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9cf06a"></stop><stop offset="1" stop-color="#1e7a1c"></stop>
+    </linearGradient>
+    <radialGradient id="gCoin" cx=".4" cy=".35" r=".7">
+      <stop offset="0" stop-color="#fffbe0"></stop><stop offset=".5" stop-color="#ffcf3a"></stop><stop offset="1" stop-color="#9a6206"></stop>
+    </radialGradient>
+    <radialGradient id="gHub" cx=".4" cy=".35" r=".7">
+      <stop offset="0" stop-color="#fff8d0"></stop><stop offset=".55" stop-color="#f2b92c"></stop><stop offset="1" stop-color="#7a4c04"></stop>
+    </radialGradient>
+    <radialGradient id="gSegShade" cx=".5" cy=".5" r=".5">
+      <stop offset=".55" stop-color="#fff" stop-opacity=".18"></stop><stop offset="1" stop-color="#000" stop-opacity=".28"></stop>
+    </radialGradient>
+  </defs>
+</svg>
+
+<div id="viewport">
+  <div id="stage">
+    <div id="marquee">
+      <h1>GRAN RUEDA DORADA</h1>
+      <div class="bulbs" id="marqueeBulbs"></div>
+    </div>
+    <button id="mute" type="button" aria-label="Silenciar sonido">SON</button>
+
+    <div id="topbox">
+      <div id="wheelWrap" aria-label="Rueda de bonificación"></div>
+      <div id="bonusBanner" hidden>¡GIRA LA RUEDA!</div>
+    </div>
+
+    <div id="reelBox">
+      <div id="reelInner">
+        <div class="reel"><div class="strip" id="s0"></div></div>
+        <div class="reel"><div class="strip" id="s1"></div></div>
+        <div class="reel"><div class="strip" id="s2"></div></div>
+        <div id="payline"></div>
+      </div>
+      <div class="lineTag" id="tagL">1</div><div class="lineTag" id="tagR">1</div>
+    </div>
+    <div id="winFx"></div>
+
+    <div id="meters">
+      <div class="meter"><label for="mCredit">Créditos</label><output id="mCredit">1000</output></div>
+      <div class="meter"><label for="mBet">Apuesta</label><output id="mBet">3</output></div>
+      <div class="meter"><label for="mWin">Ganancia</label><output id="mWin">0</output></div>
+    </div>
+
+    <div id="deck">
+      <button class="btn b-info" id="bInfo" type="button">Pagos</button>
+      <button class="btn b-bet" id="bBet" type="button">Apostar 1<small>crédito</small></button>
+      <button class="btn b-max" id="bMax" type="button">Apuesta<small>máxima</small></button>
+      <button class="btn b-spin" id="bSpin" type="button">GIRAR</button>
+    </div>
+
+    <div id="pay" hidden>
+      <h2>TABLA DE PAGOS</h2>
+      <p>Una línea de pago. Apuesta <b>3 créditos</b> para activar la rueda:<br>el símbolo <b>GIRA</b> en el tercer carrete otorga un giro de la rueda.</p>
+      <table id="payTable">
+        <thead><tr><th>Combinación</th><th>1 crédito</th><th>2 créditos</th><th>3 créditos</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="note">
+        <b>Comodín 2X</b> sustituye a todos los símbolos excepto GIRA. Un comodín en una combinación ganadora duplica el premio; dos comodines lo multiplican por 4.<br>
+        <b>Rueda:</b> 22 casillas de 25 a 1000 créditos.<br>
+        Retorno teórico: 94,5&nbsp;% con apuesta máxima. Juego de demostración con créditos ficticios; no hay dinero real.
+      </div>
+      <button class="btn close" id="bClose" type="button">Volver al juego</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+
+/* ================= SYMBOL ART ================= */
+const ART = {
+  X: "",
+  S7: `<svg viewBox="0 0 150 100"><g transform="translate(75 50)">
+      <path d="M-42 -40 H44 V-22 L2 42 H-26 L16 -18 H-42 Z" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="7" stroke-linejoin="round" paint-order="stroke"/>
+      <path d="M-42 -40 H44 V-22 L2 42 H-26 L16 -18 H-42 Z" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.5"/>
+      <path d="M-36 -35 H38 V-30 H-36 Z" fill="#fff" opacity=".45"/></g></svg>`,
+  W: `<svg viewBox="0 0 150 100"><g transform="translate(75 50)">
+      ${Array.from({length: 16}, (_, i) => `<path d="M0 0 L-5 -50 L5 -50 Z" fill="#ffd34d" opacity=".55" transform="rotate(${i * 22.5})"/>`).join("")}
+      <circle r="40" fill="url(#gCoin)" stroke="#8a5300" stroke-width="3"/>
+      <circle r="33" fill="none" stroke="#fff7c0" stroke-width="2" stroke-dasharray="4 4"/>
+      <text y="9" text-anchor="middle" font-family="Bungee, Impact, sans-serif" font-size="32" fill="#c8102e" stroke="#fff" stroke-width="3" paint-order="stroke">2X</text>
+      <rect x="-34" y="18" width="68" height="18" rx="4" fill="#1f3fae" stroke="#fff3b0" stroke-width="2"/>
+      <text y="32" text-anchor="middle" font-family="Oswald, sans-serif" font-weight="700" font-size="14" fill="#fff" letter-spacing="2">COMODÍN</text></g></svg>`,
+  CH: `<svg viewBox="0 0 150 100"><g transform="translate(75 50)">
+      <path d="M-18 14 C-14 -12 -2 -30 10 -40 M22 18 C18 -6 14 -26 10 -40" fill="none" stroke="#3b6d12" stroke-width="5" stroke-linecap="round"/>
+      <path d="M10 -40 C26 -54 46 -46 50 -34 C34 -26 18 -30 10 -40 Z" fill="url(#gLeaf)" stroke="#164f12" stroke-width="2"/>
+      <circle cx="-20" cy="22" r="22" fill="url(#gCherry)" stroke="#4a0010" stroke-width="2"/>
+      <circle cx="22" cy="26" r="21" fill="url(#gCherry)" stroke="#4a0010" stroke-width="2"/>
+      <ellipse cx="-27" cy="13" rx="6" ry="4" fill="#fff" opacity=".8" transform="rotate(-30 -27 13)"/>
+      <ellipse cx="15" cy="17" rx="5.5" ry="3.5" fill="#fff" opacity=".8" transform="rotate(-30 15 17)"/></g></svg>`,
+  SP: `<svg viewBox="0 0 150 100"><g transform="translate(75 46)">
+      ${Array.from({length: 8}, (_, i) => {
+        const c = ["#e5243b","#f6a313","#2f9e44","#1c6bd6","#8e2bd9","#ff5fa2","#16b5c9","#ffd21f"][i];
+        const a0 = (i * 45 - 22.5) * Math.PI / 180, a1 = ((i + 1) * 45 - 22.5) * Math.PI / 180;
+        return `<path d="M0 0 L${38 * Math.sin(a0)} ${-38 * Math.cos(a0)} A38 38 0 0 1 ${38 * Math.sin(a1)} ${-38 * Math.cos(a1)} Z" fill="${c}"/>`;
+      }).join("")}
+      <circle r="38" fill="none" stroke="url(#gGold)" stroke-width="6"/>
+      <circle r="9" fill="url(#gHub)"/>
+      <rect x="-48" y="18" width="96" height="30" rx="8" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="3"/>
+      <text y="41" text-anchor="middle" font-family="Bungee, Impact, sans-serif" font-size="22" fill="#fff" stroke="#5a0414" stroke-width="3" paint-order="stroke">GIRA</text></g></svg>`,
+};
+function barArt(n) {
+  const h = n === 1 ? 34 : n === 2 ? 26 : 22, gap = 6, total = n * h + (n - 1) * gap;
+  const edge = n === 1 ? "#1f5fe0" : n === 2 ? "#e01b2e" : "url(#gGold)";
+  let g = "";
+  for (let i = 0; i < n; i++) {
+    const y = -total / 2 + i * (h + gap);
+    g += `<rect x="-56" y="${y}" width="112" height="${h}" rx="6" fill="url(#gBar)" stroke="${edge}" stroke-width="4"/>
+          <text y="${y + h / 2 + h * .3}" text-anchor="middle" font-family="Anton, Impact, sans-serif" font-size="${h * .85}" fill="#fff" letter-spacing="3">BAR</text>`;
+  }
+  return `<svg viewBox="0 0 150 100"><g transform="translate(75 50)">${g}</g></svg>`;
+}
+ART.B1 = barArt(1); ART.B2 = barArt(2); ART.B3 = barArt(3);
+
+/* ================= GAME MATH =================
+   Weighted virtual stops, like real stepper machines: blanks carry more weight. */
+const STRIPS = [
+  ["W","X","B1","X","CH","X","B2","X","S7","X","B1","X","B3","X","CH","X","B1","X","B2","X","B1","X"],
+  ["W","X","B1","X","B2","X","CH","X","S7","X","B1","X","B3","X","B1","X","B2","X","CH","X","B1","X"],
+  ["W","X","B1","X","SP","X","B2","X","S7","X","B1","X","B3","X","CH","X","B1","X","B2","X","SP","X"],
+];
+const STOP_WEIGHT = { X: 3, B1: 3, B2: 2, B3: 2, S7: 1, W: 1, CH: 2, SP: 0.6 };
+const LEN = 22;
+const TOP_AWARD = [800, 1600, 5000];
+const COMBOS = [
+  { name: "3 Sietes", art: ["S7","S7","S7"], set: ["S7"], pay: 80 },
+  { name: "3 Triple BAR", art: ["B3","B3","B3"], set: ["B3"], pay: 40 },
+  { name: "3 Doble BAR", art: ["B2","B2","B2"], set: ["B2"], pay: 20 },
+  { name: "3 BAR", art: ["B1","B1","B1"], set: ["B1"], pay: 10 },
+  { name: "3 Cerezas", art: ["CH","CH","CH"], set: ["CH"], pay: 10 },
+  { name: "3 BAR mixtas", art: ["B1","B2","B3"], set: ["B1","B2","B3"], pay: 2 },
+];
+const WHEEL = [1000,25,100,50,200,30,75,300,40,150,500,25,120,60,250,35,80,400,45,100,750,50];
+const WHEEL_W = WHEEL.map(v => 1 / Math.pow(v, 1.8));
+const WHEEL_COLORS = ["#d81e3c","#1d63d8","#f2a614","#2a9d48","#8a2bd6","#e8467f","#13a7bf","#f06b17","#4c3bd1","#c41f7a","#2fb36b"];
+
+function evaluate(line, bet) {
+  const nW = line.filter(s => s === "W").length;
+  if (nW === 3) return { pay: TOP_AWARD[bet - 1], name: "3 Comodines", cells: [0,1,2] };
+  for (const c of COMBOS) {
+    if (line.every(s => s === "W" || c.set.includes(s))) {
+      const mult = 2 ** nW;
+      return { pay: c.pay * bet * mult, name: c.name + (mult > 1 ? ` ×${mult}` : ""), cells: [0,1,2] };
+    }
+  }
+  const cherries = line.filter(s => s === "CH").length;
+  if (cherries) {
+    const k = cherries + nW;
+    const cells = line.map((s, i) => (s === "CH" || s === "W") ? i : -1).filter(i => i >= 0);
+    return { pay: (k >= 2 ? 5 : 2) * bet, name: k >= 2 ? "2 Cerezas" : "1 Cereza", cells };
+  }
+  return { pay: 0, name: "", cells: [] };
+}
+function weightedPick(weights) {
+  const total = weights.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < weights.length; i++) { r -= weights[i]; if (r < 0) return i; }
+  return weights.length - 1;
+}
+
+/* ================= AUDIO (synthesized) ================= */
+let actx = null, muted = false;
+function ac() {
+  if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; } }
+  if (actx && actx.state === "suspended") actx.resume();
+  return actx;
+}
+function tone(freq, dur, type = "square", vol = .08, when = 0, slide = 0) {
+  if (muted) return; const a = ac(); if (!a) return;
+  const t = a.currentTime + when, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, freq + slide), t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + .02);
+}
+const sfx = {
+  button: () => tone(880, .06, "square", .05),
+  start: () => { tone(220, .12, "sawtooth", .05, 0, 300); },
+  stop: () => { tone(120, .09, "triangle", .2, 0, -60); tone(1800, .03, "square", .03); },
+  click: () => tone(1400 + Math.random() * 200, .025, "square", .045),
+  tick: () => tone(1320, .03, "triangle", .05),
+  win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .18, "square", .06, i * .09)),
+  big: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, .22, "square", .07, i * .11)),
+  bonus: () => [392, 523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, .2, "sawtooth", .05, i * .1)),
+};
+
+/* ================= LIGHT BULBS ================= */
+function ringOfBulbs(container, w, h, count) {
+  const per = 2 * (w + h), step = per / count;
+  for (let i = 0; i < count; i++) {
+    let d = i * step, x, y;
+    if (d < w) { x = d; y = 0; } else if ((d -= w) < h) { x = w; y = d; }
+    else if ((d -= h) < w) { x = w - d; y = h; } else { d -= w; x = 0; y = h - d; }
+    const b = document.createElement("span");
+    b.className = "bulb" + (i % 2 ? " b" : "");
+    b.style.left = (x / w * 100) + "%"; b.style.top = (y / h * 100) + "%";
+    container.appendChild(b);
+  }
+}
+ringOfBulbs($("marqueeBulbs"), 660, 92, 56);
+
+/* ================= WHEEL ================= */
+const SEG = 360 / WHEEL.length, CX = 300, CY = 300, R = 262;
+const pt = (r, deg) => { const a = deg * Math.PI / 180; return [CX + r * Math.sin(a), CY - r * Math.cos(a)]; };
+function buildWheel() {
+  let segs = "", labels = "", pegs = "", bulbs = "";
+  WHEEL.forEach((v, i) => {
+    const a0 = i * SEG - SEG / 2, a1 = a0 + SEG;
+    const [x0, y0] = pt(R, a0), [x1, y1] = pt(R, a1);
+    const fill = v === 1000 ? "#121212" : v >= 500 ? "#f4f0e6" : WHEEL_COLORS[i % WHEEL_COLORS.length];
+    segs += `<path d="M${CX} ${CY} L${x0} ${y0} A${R} ${R} 0 0 1 ${x1} ${y1} Z" fill="${fill}" stroke="#5a3a06" stroke-width="1.5"/>`;
+    const txtFill = v === 1000 ? "url(#gGold)" : v >= 500 ? "#c8102e" : "#fff";
+    const digits = String(v).split("");
+    const size = digits.length === 4 ? 30 : 34;
+    let g = "";
+    digits.forEach((d, k) => {
+      g += `<text x="${CX}" y="${CY - R + 46 + k * (size * .92)}" text-anchor="middle" font-family="Anton, Impact, sans-serif" font-size="${size}" fill="${txtFill}" stroke="${v >= 500 && v < 1000 ? "#fff" : "#000"}" stroke-opacity=".5" stroke-width="1.2">${d}</text>`;
+    });
+    labels += `<g transform="rotate(${i * SEG} ${CX} ${CY})">${g}</g>`;
+    const [px, py] = pt(R - 8, a0);
+    pegs += `<circle cx="${px}" cy="${py}" r="5" fill="url(#gHub)" stroke="#5a3a06" stroke-width="1"/>`;
+  });
+  for (let i = 0; i < 44; i++) {
+    const [bx, by] = pt(281, i * (360 / 44) + 4);
+    bulbs += `<circle class="wb ${i % 2 ? "b" : "a"}" cx="${bx}" cy="${by}" r="6.5"/>`;
+  }
+  $("wheelWrap").innerHTML = `
+  <svg viewBox="0 0 600 600" role="img" aria-label="Rueda con premios de 25 a 1000 créditos">
+    <style>
+      .wb { fill: #fff3c0; filter: drop-shadow(0 0 4px #ffcc40); animation: wbl 1.2s steps(1) infinite; }
+      .wb.b { animation-delay: -.6s; }
+      .fast .wb { animation-duration: .2s; } .fast .wb.b { animation-delay: -.1s; }
+      @keyframes wbl { 50% { fill: #6b4a10; filter: none; } }
+      @media (prefers-reduced-motion: reduce) { .wb { animation: none; } }
+    </style>
+    <circle cx="300" cy="304" r="296" fill="#000" opacity=".45"/>
+    <circle cx="300" cy="300" r="294" fill="url(#gGold)"/>
+    <circle cx="300" cy="300" r="268" fill="#3a2404"/>
+    <g id="wheelRot">
+      ${segs}
+      <circle cx="${CX}" cy="${CY}" r="${R}" fill="url(#gSegShade)"/>
+      ${labels}${pegs}
+      <path id="winWedge" d="M${CX} ${CY} L${pt(R, -SEG / 2).join(" ")} A${R} ${R} 0 0 1 ${pt(R, SEG / 2).join(" ")} Z" fill="#fff" opacity="0"/>
+    </g>
+    <g id="wheelBulbs">${bulbs}</g>
+    <circle cx="300" cy="300" r="58" fill="url(#gHub)" stroke="#6b4300" stroke-width="4"/>
+    <circle cx="300" cy="300" r="46" fill="none" stroke="#fff6c8" stroke-width="2" stroke-dasharray="3 5"/>
+    <path d="M300 262 L310 290 L339 290 L316 307 L325 335 L300 318 L275 335 L284 307 L261 290 L290 290 Z" fill="#c8102e" stroke="#fff6c8" stroke-width="2.5" stroke-linejoin="round"/>
+    <g id="pointer">
+      <path d="M282 0 H318 V20 L300 58 L282 20 Z" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="4" stroke-linejoin="round" paint-order="stroke"/>
+      <circle cx="300" cy="10" r="6" fill="url(#gHub)"/>
+    </g>
+  </svg>`;
+}
+buildWheel();
+
+/* ================= REELS ================= */
+const CELL = 111;
+const strips = [0,1,2].map(i => $("s" + i));
+const reelPos = [0,0,0]; // index of the TOP visible stop (float while spinning)
+strips.forEach((el, r) => {
+  let html = "";
+  for (let rep = 0; rep < 3; rep++) for (const s of STRIPS[r]) html += `<div class="cell">${ART[s]}</div>`;
+  el.innerHTML = html;
+  reelPos[r] = Math.floor(Math.random() * LEN);
+  placeReel(r);
+});
+function placeReel(r) {
+  const p = ((reelPos[r] % LEN) + LEN) % LEN;
+  strips[r].style.transform = `translateY(${-p * CELL + 0}px)`;
+}
+function cellEl(r, row) { // row 0..2 visible
+  const p = Math.round(((reelPos[r] % LEN) + LEN) % LEN);
+  return strips[r].children[p + row];
+}
+function easeReel(t) { // fast start, long glide, small bounce past the stop
+  const s = 1.15; t -= 1; return t * t * ((s + 1) * t + s) + 1;
+}
+function spinReel(r, target, duration) {
+  return new Promise(res => {
+    const from = reelPos[r];
+    const curr = ((from % LEN) + LEN) % LEN;
+    const wantTop = ((target - 1) % LEN + LEN) % LEN;
+    const dist = (4 + r) * LEN + ((wantTop - curr) % LEN + LEN) % LEN;
+    const t0 = performance.now(); let last = from;
+    strips[r].classList.add("blur");
+    (function frame(now) {
+      const t = Math.min(1, (now - t0) / duration);
+      reelPos[r] = from + dist * easeReel(t);
+      const v = Math.abs(reelPos[r] - last); last = reelPos[r];
+      strips[r].classList.toggle("blur", v > .25);
+      placeReel(r);
+      if (t < 1) requestAnimationFrame(frame);
+      else { reelPos[r] = from + dist; placeReel(r); strips[r].classList.remove("blur"); sfx.stop(); res(); }
+    })(t0);
+  });
+}
+
+/* ================= STATE / UI ================= */
+const SAVE_KEY = "gran-rueda-dorada-v1";
+let credits = 1000, bet = 3, lastWin = 0, state = "idle"; // idle | spinning | bonus | wheel | rollup
+try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); if (s && Number.isFinite(s.credits)) { credits = s.credits; bet = s.bet || 3; } } catch (e) {}
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ credits, bet })); } catch (e) {} }
+
+const mCredit = $("mCredit"), mBet = $("mBet"), mWin = $("mWin");
+const bSpin = $("bSpin"), bBet = $("bBet"), bMax = $("bMax"), bInfo = $("bInfo");
+function render() {
+  mCredit.textContent = credits; mBet.textContent = bet; mWin.textContent = lastWin;
+  const busy = state === "spinning" || state === "wheel";
+  bBet.disabled = busy || state === "bonus" || state === "rollup";
+  bMax.disabled = busy || state === "bonus" || state === "rollup" || credits < 1;
+  bInfo.disabled = busy;
+  bSpin.disabled = busy;
+  bSpin.classList.toggle("glow", state === "bonus");
+  if (state === "bonus") bSpin.innerHTML = "RUEDA";
+  else if (credits < 1 && state === "idle") bSpin.innerHTML = '<span style="font-size:19px">RECARGAR</span>';
+  else bSpin.innerHTML = "GIRAR";
+}
+
+function clearWins() {
+  document.querySelectorAll(".cell.win").forEach(c => c.classList.remove("win"));
+  $("payline").classList.remove("hot");
+  $("winFx").textContent = ""; $("winFx").className = "";
+  $("winWedge").setAttribute("opacity", "0");
+}
+
+let rollupSkip = null;
+function rollup(amount, label) {
+  return new Promise(res => {
+    state = "rollup"; render();
+    const fx = $("winFx");
+    fx.innerHTML = `${amount}<small>${label}</small>`; fx.className = ""; void fx.offsetWidth; fx.className = "show";
+    const start = credits, startWin = lastWin;
+    const steps = Math.min(amount, 60), dur = Math.min(3200, 400 + amount * 12);
+    const t0 = performance.now(); let shown = 0, done = false;
+    const finish = () => {
+      if (done) return; done = true;
+      credits = start + amount; lastWin = startWin + amount; save(); rollupSkip = null; render(); res();
+    };
+    rollupSkip = finish;
+    (function frame(now) {
+      if (done) return;
+      const t = Math.min(1, (now - t0) / dur), add = Math.round(amount * t);
+      if (Math.floor(t * steps) > shown) { shown = Math.floor(t * steps); sfx.tick(); }
+      credits = start + add; lastWin = startWin + add; mCredit.textContent = credits; mWin.textContent = lastWin;
+      if (t < 1) requestAnimationFrame(frame); else finish();
+    })(t0);
+  });
+}
+
+async function spin() {
+  if (state === "rollup" && rollupSkip) { rollupSkip(); return; }
+  if (state === "bonus") return spinWheel();
+  if (state !== "idle") return;
+  if (credits < 1) { credits = 1000; lastWin = 0; save(); render(); sfx.win(); return; }
+  if (bet > credits) bet = credits;
+  ac();
+  clearWins();
+  credits -= bet; lastWin = 0; save();
+  state = "spinning"; render(); sfx.start();
+
+  const stops = [0,1,2].map(r => weightedPick(STRIPS[r].map(s => STOP_WEIGHT[s])));
+  const line = stops.map((s, r) => STRIPS[r][s]);
+  // anticipation: hold the third reel longer when a bonus or top award is possible
+  const tease = bet === 3 && (line[2] === "SP" || (line[0] === "W" && line[1] === "W"));
+  await Promise.all([
+    spinReel(0, stops[0], 1100),
+    spinReel(1, stops[1], 1500),
+    spinReel(2, stops[2], tease ? 2900 : 1900),
+  ]);
+
+  const res = evaluate(line, bet);
+  const bonus = bet === 3 && line[2] === "SP";
+  if (res.pay > 0) {
+    res.cells.forEach(r => cellEl(r, 1).classList.add("win"));
+    $("payline").classList.add("hot");
+    res.pay >= bet * 40 ? sfx.big() : sfx.win();
+    await rollup(res.pay, res.name);
+  }
+  if (bonus) {
+    cellEl(2, 1).classList.add("win");
+    state = "bonus"; sfx.bonus();
+    $("bonusBanner").hidden = false;
+    $("stage").classList.add("fast");
+    render();
+    return;
+  }
+  state = "idle"; render();
+}
+
+let wheelAngle = 0;
+function spinWheel() {
+  if (state !== "bonus") return;
+  state = "wheel"; render();
+  $("bonusBanner").hidden = true;
+  sfx.start();
+  const idx = weightedPick(WHEEL_W);
+  const jitter = (Math.random() - .5) * SEG * .7;
+  const curr = ((wheelAngle % 360) + 360) % 360;
+  const want = ((-(idx * SEG) - jitter) % 360 + 360) % 360;
+  const delta = 5 * 360 + ((want - curr) % 360 + 360) % 360;
+  const from = wheelAngle, dur = 7200, t0 = performance.now();
+  const rot = $("wheelRot"), pointer = $("pointer");
+  let lastPeg = Math.floor((from + SEG / 2) / SEG);
+  return new Promise(res => {
+    (function frame(now) {
+      const t = Math.min(1, (now - t0) / dur);
+      const e = 1 - Math.pow(1 - t, 3.6);
+      wheelAngle = from + delta * e;
+      rot.setAttribute("transform", `rotate(${wheelAngle} 300 300)`);
+      const peg = Math.floor((wheelAngle + SEG / 2) / SEG);
+      if (peg !== lastPeg) {
+        lastPeg = peg; sfx.click();
+        pointer.style.transform = "rotate(-22deg)";
+        setTimeout(() => { pointer.style.transform = ""; }, 60);
+      }
+      if (t < 1) { requestAnimationFrame(frame); return; }
+      // land: flash winning wedge
+      const wedge = $("winWedge");
+      wedge.setAttribute("transform", `rotate(${idx * SEG} 300 300)`);
+      let n = 0;
+      const flash = setInterval(() => {
+        wedge.setAttribute("opacity", n % 2 ? "0" : ".45");
+        if (++n > 9) { clearInterval(flash); wedge.setAttribute("opacity", ".3"); }
+      }, 140);
+      const value = WHEEL[idx];
+      value >= 300 ? sfx.big() : sfx.win();
+      $("stage").classList.remove("fast");
+      rollup(value, "PREMIO DE LA RUEDA").then(() => { state = "idle"; render(); res(); });
+    })(t0);
+  });
+}
+
+/* ================= PAYTABLE ================= */
+function buildPaytable() {
+  const mini = s => ART[s] || "";
+  const rows = [
+    { art: ["W","W","W"], name: "3 Comodines", pays: TOP_AWARD },
+    ...COMBOS.map(c => ({ art: c.art, name: c.name, pays: [1,2,3].map(b => c.pay * b) })),
+    { art: ["CH","CH"], name: "2 Cerezas", pays: [5,10,15] },
+    { art: ["CH"], name: "1 Cereza", pays: [2,4,6] },
+    { art: ["X","X","SP"], name: "Rueda (solo 3 créditos)", pays: ["—","—","25–1000"] },
+  ];
+  $("payTable").querySelector("tbody").innerHTML = rows.map(r =>
+    `<tr><td>${r.art.map(mini).join("")}<span>${r.name}</span></td>${r.pays.map((p, i) => `<td class="${i === 2 ? "max" : ""}">${p}</td>`).join("")}</tr>`
+  ).join("");
+}
+buildPaytable();
+
+/* ================= INPUT ================= */
+bSpin.addEventListener("click", spin);
+$("wheelWrap").addEventListener("click", () => { if (state === "bonus") spinWheel(); });
+bBet.addEventListener("click", () => { if (state !== "idle") return; bet = bet % 3 + 1; if (bet > credits) bet = Math.max(1, credits); sfx.button(); save(); render(); });
+bMax.addEventListener("click", () => { if (state !== "idle") return; bet = Math.min(3, credits); save(); render(); spin(); });
+bInfo.addEventListener("click", () => { sfx.button(); $("pay").hidden = false; $("bClose").focus(); });
+$("bClose").addEventListener("click", () => { $("pay").hidden = true; bSpin.focus(); });
+$("mute").addEventListener("click", () => { muted = !muted; $("mute").textContent = muted ? "MUDO" : "SON"; $("mute").setAttribute("aria-label", muted ? "Activar sonido" : "Silenciar sonido"); });
+document.addEventListener("keydown", e => {
+  if (!$("pay").hidden) { if (e.key === "Escape") $("bClose").click(); return; }
+  if (e.code === "Space" || e.key === "Enter") { if (document.activeElement && document.activeElement.tagName === "BUTTON" && e.key === "Enter") return; e.preventDefault(); spin(); }
+});
+
+/* ================= SCALE TO FIT ================= */
+function fit() {
+  const s = Math.min(window.innerWidth / 740, window.innerHeight / 1300);
+  $("stage").style.transform = `scale(${s}) translate(-50%, -50%)`;
+}
+window.addEventListener("resize", fit); fit();
+render();
+})();
+</script>
+</body>
+</html>
