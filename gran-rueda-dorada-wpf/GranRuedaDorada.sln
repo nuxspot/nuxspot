@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F491E633-F39B-438C-82C7-1AAE6D69C807}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GranRuedaDorada", "src\GranRuedaDorada\GranRuedaDorada.csproj", "{8543E7B6-AC29-4642-B51D-D6A00E9B6174}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{22C1A84C-1445-49EC-AB64-A9D81939D6B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GranRuedaDorada.Tests", "tests\GranRuedaDorada.Tests\GranRuedaDorada.Tests.csproj", "{FDABA65A-F0CA-4630-9CB6-5DF864C48261}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8543E7B6-AC29-4642-B51D-D6A00E9B6174}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8543E7B6-AC29-4642-B51D-D6A00E9B6174}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8543E7B6-AC29-4642-B51D-D6A00E9B6174}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8543E7B6-AC29-4642-B51D-D6A00E9B6174}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDABA65A-F0CA-4630-9CB6-5DF864C48261}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDABA65A-F0CA-4630-9CB6-5DF864C48261}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDABA65A-F0CA-4630-9CB6-5DF864C48261}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDABA65A-F0CA-4630-9CB6-5DF864C48261}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8543E7B6-AC29-4642-B51D-D6A00E9B6174} = {F491E633-F39B-438C-82C7-1AAE6D69C807}
+		{FDABA65A-F0CA-4630-9CB6-5DF864C48261} = {22C1A84C-1445-49EC-AB64-A9D81939D6B2}
+	EndGlobalSection
+EndGlobal

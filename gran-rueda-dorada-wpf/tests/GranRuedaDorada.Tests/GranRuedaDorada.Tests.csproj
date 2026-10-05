@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- The engine and synthesizer have no WPF dependency, so they are tested cross-platform by linking the sources. -->
+  <ItemGroup>
+    <Compile Include="../../src/GranRuedaDorada/Engine/SlotEngine.cs" Link="Linked/SlotEngine.cs" />
+    <Compile Include="../../src/GranRuedaDorada/Audio/Synth.cs" Link="Linked/Synth.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+</Project>

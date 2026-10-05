@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>GranRuedaDorada</AssemblyName>
+    <RootNamespace>GranRuedaDorada</RootNamespace>
+    <Product>Gran Rueda Dorada</Product>
+    <Version>1.0.0</Version>
+    <!-- Lets the project build on Linux/macOS CI too; the app itself runs on Windows. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>
